@@ -7,6 +7,7 @@ use App\Http\Controllers\MarketDataController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TradeController;
 use App\Http\Controllers\WalletController;
+use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -33,12 +34,20 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/transactions/{transaction}/approve', [AdminController::class, 'approveTransaction'])->name('transactions.approve');
     Route::post('/transactions/{transaction}/reject', [AdminController::class, 'rejectTransaction'])->name('transactions.reject');
     Route::post('/users/{user}/send-money', [AdminController::class, 'sendMoney'])->name('users.send-money');
+    
+    // Admin Verification Review
+    Route::post('/documents/{document}/approve', [AdminController::class, 'approveDocument'])->name('documents.approve');
+    Route::post('/documents/{document}/reject', [AdminController::class, 'rejectDocument'])->name('documents.reject');
 });
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Verification Routes
+    Route::get('/verification', [VerificationController::class, 'index'])->name('verification.index');
+    Route::post('/verification', [VerificationController::class, 'store'])->name('verification.store');
 });
 
 require __DIR__.'/auth.php';

@@ -47,6 +47,26 @@
             @endif
         </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
+            <div class="col-span-2">
+                <x-input-label for="phone" :value="__('Phone Number')" />
+                <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" placeholder="+1 234 567 890" />
+                <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+            </div>
+
+            <div>
+                <x-input-label for="country" :value="__('Country')" />
+                <x-text-input id="country" name="country" type="text" class="mt-1 block w-full" :value="old('country', $user->country)" placeholder="United States" />
+                <x-input-error class="mt-2" :messages="$errors->get('country')" />
+            </div>
+
+            <div>
+                <x-input-label for="address" :value="__('Street Address')" />
+                <x-text-input id="address" name="address" type="text" class="mt-1 block w-full" :value="old('address', $user->address)" placeholder="123 Trading St" />
+                <x-input-error class="mt-2" :messages="$errors->get('address')" />
+            </div>
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

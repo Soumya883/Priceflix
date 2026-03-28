@@ -23,13 +23,49 @@ class AdminController extends Controller
             'orders' => Order::count(),
             'pending_orders' => Order::where('status', 'open')->count(),
             'total_volume' => (float) Order::sum('filled_quantity'),
+            'pending_verifications' => \App\Models\Document::where('status', 'pending')->count(),
         ];
 
-        $users = User::with('wallets.asset')->latest()->paginate(20);
+        $users = User::with(['wallets.asset', 'documents'])->latest()->paginate(20);
         $recentOrders = Order::with(['user', 'market'])->latest()->take(10)->get();
         $pendingTransactions = Transaction::with(['user', 'asset'])->where('status', 'pending')->latest()->get();
+        $pendingDocuments = \App\Models\Document::with('user')->where('status', 'pending')->latest()->get();
 
-        return view('admin.index', compact('stats', 'users', 'recentOrders', 'pendingTransactions'));
+        return view('admin.index', compact('stats', 'users', 'recentOrders', 'pendingTransactions', 'pendingDocuments'));
+    }
+
+    public function approveDocument(\App\Models\Document $document)
+    {
+        DB::transaction(function () use ($document) {
+            $document->update([
+                'status' => 'approved',
+                'processed_by' => auth()->id(),
+                'processed_at' => now(),
+            ]);
+
+            // Check if all essential docs are approved to set user as verified
+            $document->user->update(['verification_status' => 'verified']);
+        });
+
+        return back()->with('success', "Identity document for {$document->user->name} approved.");
+    }
+
+    public function rejectDocument(\App\Models\Document $document, Request $request)
+    {
+        $request->validate(['reason' => 'required|string|max:255']);
+
+        DB::transaction(function () use ($document, $request) {
+            $document->update([
+                'status' => 'rejected',
+                'rejection_reason' => $request->reason,
+                'processed_by' => auth()->id(),
+                'processed_at' => now(),
+            ]);
+
+            $document->user->update(['verification_status' => 'unverified']);
+        });
+
+        return back()->with('success', "Identity document for {$document->user->name} rejected.");
     }
 
     public function toggleAdmin(User $user)

@@ -63,9 +63,17 @@
 
             <div class="flex items-center gap-4">
                 @auth
-                    <a href="{{ route('dashboard') }}" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-semibold shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all transform hover:-translate-y-0.5">
-                        Dashboard →
-                    </a>
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('dashboard') }}" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-semibold shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all transform hover:-translate-y-0.5">
+                            Trading Terminal
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" class="hidden sm:block">
+                            @csrf
+                            <button type="submit" class="px-4 py-2.5 rounded-xl border border-white/10 hover:border-rose-500/50 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 font-medium transition-all text-sm uppercase tracking-widest font-black">
+                                Logout
+                            </button>
+                        </form>
+                    </div>
                 @else
                     <a href="{{ route('login') }}" class="hidden sm:block px-5 py-2.5 rounded-xl border border-white/10 hover:border-cyan-400/50 hover:bg-cyan-900/10 text-slate-200 font-medium transition-all">
                         Log in

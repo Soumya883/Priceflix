@@ -89,6 +89,99 @@
                 </div>
             </div>
             
+            <!-- Identity Governance: Pending Verifications -->
+            <div class="mb-8 overflow-hidden">
+                <div class="flex items-center justify-between mb-4 px-2">
+                    <h3 class="text-lg font-black text-white tracking-tight">Identity Governance (KYC)</h3>
+                    <div class="flex gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        <span class="text-violet-400">Security Audit Required</span>
+                        <span class="text-white/20">|</span>
+                        <span>{{ $pendingDocuments->count() }} Pending</span>
+                    </div>
+                </div>
+
+                <div class="glass-card shadow-2xl shadow-black/50 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-white/[0.02] border-b border-white/5">
+                                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Trader</th>
+                                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Doc Type</th>
+                                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Asset Link</th>
+                                    <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Submitted</th>
+                                    <th class="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Verification Hub</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                @forelse($pendingDocuments as $doc)
+                                    <tr class="hover:bg-white/[0.01] transition-colors">
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm font-bold text-white">{{ $doc->user->name }}</div>
+                                            <div class="text-[10px] text-slate-500 font-medium uppercase tracking-tight">{{ $doc->user->email }}</div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                                                {{ str_replace('_', ' ', $doc->type) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <a href="{{ Storage::url($doc->file_path) }}" target="_blank" class="inline-flex items-center gap-2 text-[10px] font-black text-cyan-400 uppercase tracking-widest hover:text-cyan-300 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                View Document
+                                            </a>
+                                        </td>
+                                        <td class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+                                            {{ $doc->created_at->diffForHumans() }}
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="flex items-center justify-end gap-2 text-xs">
+                                                <form action="{{ route('admin.documents.approve', $doc) }}" method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all">
+                                                        Approve
+                                                    </button>
+                                                </form>
+                                                
+                                                <button 
+                                                    x-data=""
+                                                    @click="$dispatch('open-modal', 'reject-doc-{{ $doc->id }}')"
+                                                    class="p-2 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500 hover:text-white transition-all">
+                                                    Reject
+                                                </button>
+
+                                                <!-- Reject Modal -->
+                                                <x-modal name="reject-doc-{{ $doc->id }}" focusable>
+                                                    <div class="p-8">
+                                                        <h2 class="text-xl font-black text-white uppercase tracking-tight mb-2">Reject Identity Document</h2>
+                                                        <form action="{{ route('admin.documents.reject', $doc) }}" method="POST" class="space-y-6">
+                                                            @csrf
+                                                            <div>
+                                                                <x-input-label for="reason" value="Rejection Reason" class="text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-slate-400" />
+                                                                <x-text-input name="reason" type="text" class="w-full" placeholder="e.g., Image too blurry, Invalid ID type" required />
+                                                            </div>
+                                                            <div class="flex justify-end gap-3 mt-8">
+                                                                <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                                                                <x-primary-button class="bg-rose-600 hover:bg-rose-500 border-none uppercase tracking-widest text-xs font-black p-4">Confirm Rejection</x-primary-button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </x-modal>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-12 text-center text-slate-600 text-[10px] font-black uppercase tracking-[0.3em] opacity-30">
+                                            Zero Pending Verifications
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- Financial Governance: Pending Transactions -->
             <div class="mb-8 overflow-hidden">
                 <div class="flex items-center justify-between mb-4 px-2">
@@ -164,7 +257,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-6 py-12 text-center">
+                                        <td colspan="7" class="px-6 py-12 text-center">
                                             <div class="flex flex-col items-center gap-2 opacity-30">
                                                 <svg class="w-8 h-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -179,7 +272,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="grid lg:grid-cols-3 gap-8">
                 <!-- User Management Table -->
                 <div class="lg:col-span-2 space-y-4">
